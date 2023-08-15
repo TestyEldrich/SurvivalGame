@@ -2,35 +2,26 @@ using System;
 using System.Collections;
 using System.Collections.Generic;
 using UnityEngine;
+using UnityEngine.InputSystem;
 
 public class PlayerMovement : MonoBehaviour
 {
     [SerializeField]private float playerSpeed = 8f;
-    private bool isFacingRight = false;
+    [SerializeField] private GameInput gameInput;
+    private bool isFacingLeft = false;
     private bool isWalking;
     private bool isRunning;
     private void Update(){
-        Vector2 direction = new Vector2 (0,0);
+        Vector2 direction = gameInput.GetMovementVector();
 
-        if (Input.GetKey(KeyCode.W)) {
-            direction.y -= 1;
-        }
-        if (Input.GetKey(KeyCode.A)) {
-            direction.x += 1;
-            if(isFacingRight) {
-                isFacingRight = false;
-                gameObject.transform.localScale = new Vector3(1, 1, 1);
-            }
-        }
-        if (Input.GetKey(KeyCode.S)) {
-            direction.y += 1;
-        }
-        if (Input.GetKey(KeyCode.D)) {
-            direction.x -= 1;
-            if (!isFacingRight) {
-                isFacingRight = true;
-                gameObject.transform.localScale = new Vector3(-1, 1, 1);
-            }
+        if (direction.x > 0 && isFacingLeft) {
+            isFacingLeft = false;
+            gameObject.transform.localScale = new Vector3(1, 1, 1);
+            Debug.Log("right");
+        }else if (direction.x < 0 && !isFacingLeft) {
+            isFacingLeft = true;
+            gameObject.transform.localScale = new Vector3(-1, 1, 1);
+            Debug.Log("left");
         }
 
         direction = direction.normalized;
@@ -40,7 +31,7 @@ public class PlayerMovement : MonoBehaviour
         isWalking = dir3 != Vector3.zero;
         isRunning = false;
 
-        if (Input.GetKey(KeyCode.LeftShift)) {
+        if (gameInput.GetIsHoldingShift()) {
             isRunning = true;
             isWalking = false;
             transform.position += dir3 * Time.deltaTime * 2*playerSpeed;
@@ -48,7 +39,6 @@ public class PlayerMovement : MonoBehaviour
         else {
             transform.position += dir3 * Time.deltaTime * playerSpeed;
         }
-
     }
 
     public bool IsWalking() {
